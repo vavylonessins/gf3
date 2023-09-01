@@ -1,0 +1,13 @@
+format gf3
+
+const koeff: int = 32
+
+class Player <- Sprite {
+    fn $ready() {
+        print("Player was spawned")
+    }
+
+    fn $process(delta: float) {
+        print("Player ticked with delta = %f\nrandom number: %d"<delta, koeff>)
+    }
+}
