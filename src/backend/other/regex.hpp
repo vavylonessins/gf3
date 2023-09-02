@@ -64,7 +64,13 @@ namespace re {
 
         char *tok_str = (char *)(char[]){(char)tok, '\0'};
 
-        printf("Token::%s", tok > 21 ? token_names[(int)tok] : tok_str);
+        if (tok > 21) {
+            printf("Char::");
+            putc((char)tok, stdout);
+            printf("\n");
+        } else {
+            printf("Token::%s\n", (char *)token_names[(int)tok]);
+        }
     }
 
     typedef Token* Tokens;
@@ -84,85 +90,39 @@ namespace re {
         void precompile(void* buffer) {
             this->code = (Tokens)buffer;
 
-            char ch;
+            char ch = '\0';
             int pattern_pos = 0;
             int code_pos = 0;
-            int stack_pos = 0;
+            int stack_pos = 64;
             int *stack = (int *)malloc(64*sizeof(int));
 
-            for (int i = 0; i < (int)this->pattern.length(); i++) {
-                ch = pattern.c_str()[i];
+            for (auto ch : this->pattern) {
+                // ch = this->pattern[i];
+
+                putc(ch, stdout);
 
                 if (ch == '\\') {
-                    if (!stack_pos || stack[stack_pos-1] != Token::ESCAPE) {
-                        stack[stack_pos++] = Token::ESCAPE;
+                    if (!stack_pos || stack[stack_pos] != Token::ESCAPE) {
+                        stack[--stack_pos] = Token::ESCAPE;
                     } else {
                         code[code_pos++] = (Token)ch;
                     }
                 } else
-                if (ch == '[') {
-                    if (!stack_pos || stack[stack_pos-1] != Token::ESCAPE) {
-                        stack[stack_pos++] = Token::BEGIN;
-                    } else {
-                        code[code_pos++] = (Token)ch;
+                if (stack_pos && stack[stack_pos] == Token::ESCAPE) {
+                    if (ch == 'B') {
+                        code[code_pos++] = Token::BEGIN;
+                        stack_pos++;
                     }
-                } else
-                if (ch == ']') {
-                    if (!stack_pos || stack[stack_pos-1] != Token::ESCAPE) {
-                        stack[stack_pos++] = Token::CLASS;
-                    } else {
-                        code[code_pos++] = (Token)ch;
-                    }
-                } else
-                if (ch == 'R') {
-                    if (!stack_pos || stack[stack_pos-1] != Token::ESCAPE) {
-                        stack[stack_pos++] = Token::RANGE;
-                    } else {
-                        code[code_pos++] = (Token)ch;
-                    }
-                } else
-                if (ch == ';') {
-                    if (!stack_pos || stack[stack_pos-1] != Token::ESCAPE) {
-                        stack[stack_pos++] = Token::SEP;
-                    } else {
-                        code[code_pos++] = (Token)ch;
-                    }
-                } else
-                if (ch == 'd' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = Token::NUM;
-                } else
-                if (ch == 'w' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = Token::ALNUM;
-                } else
-                if (ch == 'a' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = Token::ALPHA;
-                } else
-                if (ch == 'D' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = Token::NEG;
-                    code[code_pos++] = Token::NUM;
-                } else
-                if (ch == 'W' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = Token::NEG;
-                    code[code_pos++] = Token::ALNUM;
-                } else
-                if (ch == '[' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = (Token)ch;
-                } else
-                if (ch == ']' and stack[stack_pos-1] == Token::ESCAPE) {
-                    stack_pos--;
-                    code[code_pos++] = (Token)ch;
-                } else
+                }
+
                 if (ch == '\0') {
                     code[code_pos++] = Token::NONE;
                     break;
                 }
+                print_token(code[code_pos]);
             }
+
+            print_token(code[0]);
 
             free(stack);
         }
