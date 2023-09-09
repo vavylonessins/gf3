@@ -115,79 +115,100 @@ namespace honey {
             u64 cur = 0;
             char *code = (char *)this->code.c_str();
             u64 tok_cur = 0;
-            u64 status = NONE;
+            u64 status = TokenType::NONE;
             char ch = '\0';
             u64 start = 0;
             u64 end = 0;
             char *long_buffer = 0;
 
-            for (cur = 0; cur < this->code.length(); cur++) {
+            while (cur < this->code.length()) {
                 ch = code[cur];
                 DBG("Lex loop:\n\tcur = " << cur << "\n\ttok_cur = " << tok_cur << "\n\tstatus = " << toktypes[status])
                 DBG("\n\tch = '" << ch << "'\n\tstart = " << start << "\n\tend = " << end << "\n\tlong_buffer = \"" << long_buffer)
-                DBG("\"\n\n")
-                if (status == NONE) {
-                    DBG("status == NONE\n")
+                DBG("\"\n")
+                if (status == TokenType::NONE) {
+                    DBG("\tstatus == NONE\n")
                     if (isalpha(ch)) {
-                        DBG("isalpha(ch) == true\n")
-                        status = NAME;
+                        DBG("\t\tisalpha(ch) == true\n")
+                        status = TokenType::NAME;
                         start = cur;
                         long_buffer = (char *)malloc(64);
-                    } else if ('0' <= ch && ch <= '9') {
-                        status = INT;
+                    } else if (isdigit(ch)) {
+                        DBG("\t\tisdigit(ch) == true\n")
+                        status = TokenType::INT;
                         start = cur;
                         long_buffer = (char *)malloc(21);
                     } else if (ch == ':') {
-                        this->tokens[tok_cur++] = Token(COLON, ":", ivec2(cur, cur));
+                        DBG("\t\tch == ':'\n")
+                        this->tokens[tok_cur++] = Token(TokenType::COLON, ":", ivec2(cur, cur));
                         tok_cur++;
                     } else if (ch == '=') {
-                        this->tokens[tok_cur++] = Token(EQUAL, "=", ivec2(cur, cur));
+                        DBG("\t\tch == '='\n")
+                        this->tokens[tok_cur++] = Token(TokenType::EQUAL, "=", ivec2(cur, cur));
                         tok_cur++;
                     } else if (ch == '<') {
+                        DBG("\t\tch == '<'\n")
                         if (code[cur+1] == '=') {
-                            this->tokens[tok_cur++] = Token(LE, "<=", ivec2(cur, ++cur));
+                            DBG("\t\t\tdh == '='\n")
+                            this->tokens[tok_cur++] = Token(TokenType::LE, "<=", ivec2(cur, ++cur));
                         } else if (ch == '>') {
-                            this->tokens[tok_cur++] = Token(NE, "<>", ivec2(cur, ++cur));
+                            DBG("\t\t\tdh == '>'\n")
+                            this->tokens[tok_cur++] = Token(TokenType::NE, "<>", ivec2(cur, ++cur));
                         } else if (ch == '-') {
-                            this->tokens[tok_cur++] = Token(ARLEFT, "<-", ivec2(cur, ++cur));
+                            DBG("\t\t\tdh == '-'\n")
+                            this->tokens[tok_cur++] = Token(TokenType::ARLEFT, "<-", ivec2(cur, ++cur));
                         } else {
-                            this->tokens[tok_cur++] = Token(LT, "<", ivec2(cur, cur));
+                            this->tokens[tok_cur++] = Token(TokenType::LT, "<", ivec2(cur, cur));
                         };
                     } else if (ch == '>') {
+                        DBG("\t\tch == '>'\n")
                         if (code[cur+1] == '=') {
-                            this->tokens[tok_cur++] = Token(GE, ">=", ivec2(cur, ++cur));
+                            DBG("\t\t\tdh == '='\n")
+                            this->tokens[tok_cur++] = Token(TokenType::GE, ">=", ivec2(cur, ++cur));
                         } else {
-                            this->tokens[tok_cur++] = Token(GT, ">", ivec2(cur, cur));
+                            this->tokens[tok_cur++] = Token(TokenType::GT, ">", ivec2(cur, cur));
                         };
                     } else if (ch == '!') {
+                        DBG("\t\tch == '!'\n")
                         if (code[cur+1] == '=') {
-                            this->tokens[tok_cur++] = Token(NE, "!=", ivec2(cur, ++cur));
+                            DBG("\t\t\tdh == '='\n")
+                            this->tokens[tok_cur++] = Token(TokenType::NE, "!=", ivec2(cur, ++cur));
+                        } else {
+                            this->tokens[tok_cur++] = Token(TokenType::NEG, "!", ivec2(cur, cur));
                         }
                     };
-                } else if (status == NAME) {
+                } else if (status == TokenType::NAME) {
+                    DBG("\tstatus == NAME\n")
                     if (cur-start > 64) {
+                        DBG("\t\tcur - start > 64\n")
                         cout << "Name was cutted, max name length is 63 symbols" << endl;
-                        status = NONE;
+                        status = TokenType::NONE;
                         end = cur;
-                        this->tokens[tok_cur++] = Token(NAME, long_buffer, ivec2(start, end));
+                        this->tokens[tok_cur++] = Token(TokenType::NAME, long_buffer, ivec2(start, end));
                     } else if (isalnum(ch)) {
+                        DBG("\t\tisalnum(ch) == true\n")
                         long_buffer[cur-start-1] = ch;
                     } else {
-                        status = NONE;
-                        this->tokens[tok_cur++] = Token(NAME, long_buffer, ivec2(start, end));
+                        status = TokenType::NONE;
+                        this->tokens[tok_cur++] = Token(TokenType::NAME, long_buffer, ivec2(start, end));
                     };
-                } else if (status == INT) {
+                } else if (status == TokenType::INT) {
+                    DBG("\tstatus == INT\n")
                     if (cur-start > 21) {
+                        DBG("\t\tcur - start > 21\n")
                         cout << "Integer was cutted, max integer length is 20 symbols" << endl;
-                        status = NONE;
-                        this->tokens[tok_cur++] = Token(INT, long_buffer, ivec2(start, end));
-                    } else if ('0' <= ch && ch <= '9') {
+                        status = TokenType::NONE;
+                        this->tokens[tok_cur++] = Token(TokenType::INT, long_buffer, ivec2(start, end));
+                    } else if (isdigit(ch)) {
+                        DBG("\t\tisdigit(ch) == true\n")
                         long_buffer[cur-start-1] = ch;
                     } else {
-                        status = NONE;
-                        this->tokens[tok_cur++] = Token(INT, long_buffer, ivec2(start, end));
+                        status = TokenType::NONE;
+                        this->tokens[tok_cur++] = Token(TokenType::INT, long_buffer, ivec2(start, end));
                     };
                 };
+
+                cur++;
             };
 
             this->tokens[tok_cur] = Token();
