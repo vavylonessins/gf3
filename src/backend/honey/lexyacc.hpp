@@ -8,6 +8,7 @@
 #include "../other/itoa.hpp"
 #include "../other/hacks.hpp"
 #include "../other/vec.hpp"
+#include "../../dbg.hpp"
 
 namespace honey {
 
@@ -91,9 +92,9 @@ namespace honey {
     };
 
     struct Token {
-        Token(): type(NONE), value(""), pos(ivec2(0, 0)) {};
-        Token(u64 type, string value): type(type), value(value), pos(ivec2(0, 0)) {};
-        Token(u64 type, string value, ivec2 pos): type(type), value(value), pos(pos) {};
+        Token(): type(NONE), value(""), pos(ivec2(0, 0)) {DBG("Token created\n")};
+        Token(u64 type, string value): type(type), value(value), pos(ivec2(0, 0)) {DBG("Token created\n")};
+        Token(u64 type, string value, ivec2 pos): type(type), value(value), pos(pos) {DBG("Token created\n")};
 
         void print() {
             cout << "Token<" << toktypes[this->type] << ", " << this->value << "> at ";
@@ -110,19 +111,25 @@ namespace honey {
         Lexer(string code): tokens((Token *)malloc(sizeof(Token *)*4096)), code(code) {cout << "Lexer created" << endl;};
 
         u64 lex() {
+            DBG("honey::Lexer::lex was called\n")
             u64 cur = 0;
             char *code = (char *)this->code.c_str();
             u64 tok_cur = 0;
             u64 status = NONE;
-            char ch;
-            u64 start;
-            u64 end;
-            char *long_buffer;
+            char ch = '\0';
+            u64 start = 0;
+            u64 end = 0;
+            char *long_buffer = 0;
 
             for (cur = 0; cur < this->code.length(); cur++) {
                 ch = code[cur];
+                DBG("Lex loop:\n\tcur = " << cur << "\n\ttok_cur = " << tok_cur << "\n\tstatus = " << toktypes[status])
+                DBG("\n\tch = '" << ch << "'\n\tstart = " << start << "\n\tend = " << end << "\n\tlong_buffer = \"" << long_buffer)
+                DBG("\"\n\n")
                 if (status == NONE) {
+                    DBG("status == NONE\n")
                     if (isalpha(ch)) {
+                        DBG("isalpha(ch) == true\n")
                         status = NAME;
                         start = cur;
                         long_buffer = (char *)malloc(64);
