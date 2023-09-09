@@ -9,8 +9,7 @@
 #define dict_set(a, k, v) adr = a.get(k);adr[0] = (int*)v
 
 
-class dict {
-    public:
+struct dict {
 
     dict() {};
 

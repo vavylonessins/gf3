@@ -8,8 +8,7 @@
 #include "hacks.hpp"
 
 
-class ivec2 {
-    public:
+struct ivec2 {
 
     pointable
 
@@ -88,8 +87,7 @@ class ivec2 {
     };
 };
 
-class ivec3 {
-    public:
+struct ivec3 {
 
     pointable
 
@@ -180,8 +178,7 @@ class ivec3 {
     };
 };
 
-class fvec2 {
-    public:
+struct fvec2 {
 
     pointable
 

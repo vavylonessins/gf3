@@ -6,18 +6,31 @@
 #include <fstream>
 
 
-std::string pattern = "\\B1;9\\R\\C*\\D";
-
-
 int main(int argc, char** argv) {
-    re::Regex regex = re::compile(pattern);
-
-    regex.precompile();
-
-    std::cout << "Pattern to parse: \"" << pattern << "\"\n";
-
-    for (int i = 0; regex.code[i] != re::Token::NONE; i++) {
-        printf("[*] TOKEN %d : ", (int)regex.code[i]);
-        re::print_token(regex.code[i]);
+    char *buffer = (char *)malloc(1024);
+    std::string line;
+    u64 cur = 0;
+    std::ifstream file;
+    file.open("dummy.hny");
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            strcpy(buffer+cur, line.c_str());
+            cur += line.length();
+            buffer[cur] = '\n';
+            cur++;
+        }
     }
+    std::string code = std::string(buffer);
+    honey::Lexer lexer = honey::Lexer(code);
+    std::cout << lexer.code;
+
+    u64 idx = 0;
+
+    for (; lexer.tokens[idx].type != honey::TokenType::NONE; idx++) {
+        lexer.tokens[idx].print();
+    }
+
+    lexer.lex();
 }
+
+

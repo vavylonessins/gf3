@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "build": "shellscript",
+        "run": "shellscript",
+        "debug": "shellscript",
+        "*.vnb": "python",
+        "*.sublime-syntax": "yaml",
+        "_vcs": "json",
+        "*.abm": "python",
+        "iostream": "cpp",
+        "cmath": "cpp"
+    }
+}
